@@ -24,6 +24,5 @@ node_modules
 rsrc.syso
 resource.syso
 *.syso
-*
 !.gitignore
 !terragrunt.stack.hcl
