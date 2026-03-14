@@ -47,7 +47,7 @@ jobs:
         env
 
     - name: Terraform Init
-      run: terragrunt run-all plan
+      run: terragrunt run-all plan --terragrunt-non-interactive
       working-directory: environment
 
     - name: Archive Terraform Plan
