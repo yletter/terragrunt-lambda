@@ -7,6 +7,16 @@ on:
   repository_dispatch:
     types: [trigger-tf-apply]
   workflow_dispatch:
+    inputs:
+      action:
+        description: 'Choose apply or destroy'
+        required: true
+        default: 'apply'
+        type: choice
+        options:
+          - plan
+          - apply
+          - destroy
 
 jobs:
   terraform:
@@ -39,15 +49,24 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1
 
-    - name: AWS 
+    - name: AWS
       shell: bash
       run: |
         pwd
         aws s3 ls
         env
 
-    - name: Terraform Init
+    - name: Terragrunt Plan
       run: terragrunt run-all plan --terragrunt-non-interactive
+      working-directory: environment
+
+    - name: Terraform Apply or Destroy
+      run: |
+        if [[ "${{ github.event.inputs.action }}" == "apply" ]]; then
+          terragrunt run-all apply --terragrunt-non-interactive
+        elif [[ "${{ github.event.inputs.action }}" == "destroy" ]]; then
+          terragrunt run-all destroy --terragrunt-non-interactive
+        fi
       working-directory: environment
 
     - name: Archive Terraform Plan
@@ -55,4 +74,4 @@ jobs:
       uses: actions/upload-artifact@v5
       with:
         name: tfplan
-        path: terraform/tfplan
+        path: '**'
